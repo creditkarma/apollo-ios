@@ -297,15 +297,9 @@ class ParseQueryResponseTests: XCTestCase {
     let response = GraphQLResponse(operation: query, body: [
       "data": [:]
     ])
-    
-    XCTAssertThrowsError(try response.parseResult().await()) { error in
-      if case let error as GraphQLResultError = error {
-        XCTAssertEqual(error.path, ["human"])
-        XCTAssertMatch(error.underlying, JSONDecodingError.missingValue)
-      } else {
-        XCTFail("Unexpected error: \(error)")
-      }
-    }
+
+    let (result, _) = try response.parseResult().await()
+    XCTAssert(result.data?.human == nil)
   }
   
   // MARK: Mutations

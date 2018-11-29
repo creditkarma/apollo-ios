@@ -208,11 +208,20 @@ public final class GraphQLExecutor {
     info.fields = fields
     
     let resultOrPromise = resolver(object, info)
-    
+
     return resultOrPromise.on(queue: queue).flatMap { value in
-      guard let value = value else {
-        throw JSONDecodingError.missingValue
-      }
+        guard let value = value else {
+            switch firstField.type {
+            case .nonNull(_):
+                throw JSONDecodingError.missingValue
+            case .list(_):
+                throw JSONDecodingError.missingValue
+            case .scalar:
+                throw JSONDecodingError.missingValue
+            case .object:
+                return try self.complete(value: NSNull(), ofType: firstField.type, info: info, accumulator: accumulator)
+            }
+        }
       
       return try self.complete(value: value, ofType: firstField.type, info: info, accumulator: accumulator)
     }.map {
@@ -230,7 +239,7 @@ public final class GraphQLExecutor {
       if value is NSNull {
         return .result(.failure(JSONDecodingError.nullValue))
       }
-      
+
       return try complete(value: value, ofType: innerType, info: info, accumulator: accumulator)
     }
     
