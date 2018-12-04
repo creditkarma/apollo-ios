@@ -187,15 +187,10 @@ class ReadWriteFromStoreTests: XCTestCase {
       let store = ApolloStore(cache: cache)
       
       try await(store.withinReadTransaction { transaction in
-        XCTAssertThrowsError(try transaction.readObject(ofType: HeroDetails.self, withKey: "2001")) { error in
-          if case let error as GraphQLResultError = error {
-            XCTAssertEqual(error.path, ["primaryFunction"])
-            XCTAssertMatch(error.underlying, JSONDecodingError.missingValue)
-          } else {
-            XCTFail("Unexpected error: \(error)")
-          }
-        }
-      })
+        let heroDetails = try transaction.readObject(ofType: HeroDetails.self, withKey: "2001")
+        XCTAssertEqual(heroDetails.__typename, "Droid")
+        XCTAssertEqual(heroDetails.name, "R2-D2")
+        })
     }
   }
   

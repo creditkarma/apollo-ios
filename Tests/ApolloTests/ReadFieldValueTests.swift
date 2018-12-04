@@ -85,15 +85,9 @@ class ReadFieldValueTests: XCTestCase {
   func testGetOptionalScalarWithMissingKey() throws {
     let object: JSONObject = [:]
     let field = GraphQLField("name", type: .scalar(String.self))
-    
-    XCTAssertThrowsError(try readFieldValue(field, from: object)) { (error) in
-      if case let error as GraphQLResultError = error {
-        XCTAssertEqual(error.path, ["name"])
-        XCTAssertMatch(error.underlying, JSONDecodingError.missingValue)
-      } else {
-        XCTFail("Unexpected error: \(error)")
-      }
-    }
+
+    let value = try readFieldValue(field, from: object) as! String?
+    XCTAssertEqual(value, nil)
   }
   
   func testGetOptionalScalarWithNull() throws {

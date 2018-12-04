@@ -277,14 +277,12 @@ class FragmentConstructionAndConversionTests: XCTestCase {
   }
   
   func testHeroDetailsFragmentFromJSONObjectWithMissingTypeSpecificProperty() throws {
-    XCTAssertThrowsError(try HeroDetails(jsonObject: ["__typename": "Droid", "name": "R2-D2"])) { error in
-      if case let error as GraphQLResultError = error {
-        XCTAssertEqual(error.path, ["primaryFunction"])
-        XCTAssertMatch(error.underlying, JSONDecodingError.missingValue)
-      } else {
-        XCTFail("Unexpected error: \(error)")
-      }
-    }
+    let r2d2 = try HeroDetails(jsonObject: ["__typename": "Droid", "name": "R2-D2"])
+
+    XCTAssertEqual(r2d2.__typename, "Droid")
+    XCTAssertEqual(r2d2.name, "R2-D2")
+    XCTAssertNil(r2d2.asDroid?.primaryFunction)
+    XCTAssertNil(r2d2.asHuman)
   }
   
   func testHeroDetailsFragmentFromJSONObjectWithNullTypeSpecificProperty() throws {
@@ -351,15 +349,10 @@ class FragmentConstructionAndConversionTests: XCTestCase {
   
   func testConvertCharacterNameIntoHeroDetailsFragment() throws {
     let characterName = CharacterName.makeDroid(name: "R2-D2")
-    
-    XCTAssertThrowsError(try HeroDetails(characterName)) { error in
-      if case let error as GraphQLResultError = error {
-        XCTAssertEqual(error.path, ["primaryFunction"])
-        XCTAssertMatch(error.underlying, JSONDecodingError.missingValue)
-      } else {
-        XCTFail("Unexpected error: \(error)")
-      }
-    }
+    let heroDetails = try HeroDetails(characterName)
+
+    XCTAssertEqual(heroDetails.__typename, "Droid")
+    XCTAssertEqual(heroDetails.name, "R2-D2")
   }
   
   func testConvertCharacterNameIntoCharacterNameAndDroidAppearsInFragmentForDroid() throws {

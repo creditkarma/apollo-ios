@@ -217,7 +217,7 @@ public final class GraphQLExecutor {
             case .list(_):
                 throw JSONDecodingError.missingValue
             case .scalar:
-                throw JSONDecodingError.missingValue
+                return try self.complete(value: NSNull(), ofType: firstField.type, info: info, accumulator: accumulator)
             case .object:
                 return try self.complete(value: NSNull(), ofType: firstField.type, info: info, accumulator: accumulator)
             }
