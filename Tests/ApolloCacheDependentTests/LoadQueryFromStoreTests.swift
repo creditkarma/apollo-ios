@@ -198,14 +198,7 @@ class LoadQueryFromStoreTests: XCTestCase {
       let query = HeroAndFriendsNamesQuery()
 
       load(query: query) { (result, error) in
-        XCTAssertNil(result)
-
-        if case let error as GraphQLResultError = error {
-          XCTAssertEqual(error.path, ["hero", "friends"])
-          XCTAssertMatch(error.underlying, JSONDecodingError.missingValue)
-        } else {
-          XCTFail("Unexpected error: \(String(describing: error))")
-        }
+        XCTAssertEqual(result?.data?.hero?.__typename, "Droid")
       }
     }
   }
