@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/146856/124335690-fc7ecd80-db4f-11eb-93fa-dcf4469bb07b.png" alt="Apollo GraphQL"/>
+  <img src="https://raw.githubusercontent.com/apollographql/apollo-client-devtools/main/assets/apollo-wordmark.svg" alt="Apollo GraphQL"/>
 </p>
 
 <p align="center">
@@ -39,6 +39,8 @@ As the generated types are query-specific, you're only able to access data you a
 Apollo iOS does more than simply run your queries against a GraphQL server: It normalizes query results to construct a client-side cache of your data, which is kept up to date as further queries and mutations are run. This means your UI is always internally consistent, and can be kept fully up-to-date with the state on the server with the minimum number of queries required.
 
 This combination of models with value semantics, one way data flow, and automatic consistency management, leads to a very powerful and elegant programming model that allows you to eliminate common glue code and greatly simplifies app development.
+
+Apollo iOS aims to comply with the [Working Draft of the GraphQL specification](https://spec.graphql.org/draft/).
 
 ## Getting started
 

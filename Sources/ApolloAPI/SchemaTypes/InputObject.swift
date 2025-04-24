@@ -22,16 +22,28 @@ extension InputObject {
 /// A structure that wraps the underlying data dictionary used by `InputObject`s.
 public struct InputDict: GraphQLOperationVariableValue, Hashable {
 
-  private var data: [String: GraphQLOperationVariableValue]
+  private var data: [String: any GraphQLOperationVariableValue]
 
-  public init(_ data: [String: GraphQLOperationVariableValue] = [:]) {
+  public init(_ data: [String: any GraphQLOperationVariableValue] = [:]) {
     self.data = data
   }
 
   public var _jsonEncodableValue: (any JSONEncodable)? { data._jsonEncodableObject }
 
+  @_disfavoredOverload
   public subscript<T: GraphQLOperationVariableValue>(key: String) -> T {
     get { data[key] as! T }
+    set { data[key] = newValue }
+  }
+
+  public subscript<T: GraphQLOperationVariableValue>(key: String) -> GraphQLNullable<T> {
+    get {
+      if let value = data[key] {
+        return value as! GraphQLNullable<T>
+      }
+
+      return .none
+    }
     set { data[key] = newValue }
   }
 
@@ -44,3 +56,5 @@ public struct InputDict: GraphQLOperationVariableValue, Hashable {
   }
 
 }
+
+public protocol OneOfInputObject: InputObject { }

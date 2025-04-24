@@ -44,6 +44,10 @@ public struct DataDict: Hashable {
     _storage.fulfilledFragments
   }
 
+  /// The set of fragments that have not yet been fulfilled and will be delivered in a future
+  /// response.
+  ///
+  /// Each `ObjectIdentifier` in the set corresponds to a specific `SelectionSet` type.
   @inlinable public var _deferredFragments: Set<ObjectIdentifier> {
     _storage.deferredFragments
   }
@@ -170,7 +174,7 @@ extension DataDict {
   /// we need to do some additional unwrapping and casting of the values to avoid crashes and other
   /// run time bugs.
   public static let _AnyHashableCanBeCoerced: Bool = {
-    if #available(iOS 14.5, *) {
+    if #available(iOS 14.5, macOS 11.3, tvOS 14.5, watchOS 7.4, *) {
       return true
     } else {
       return false

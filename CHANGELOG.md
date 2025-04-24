@@ -1,5 +1,202 @@
 # Change Log
 
+## v1.20.0
+
+### Fixed
+- **Location of CLI download script changed in Xcode 16.3 ([#3518](https://github.com/apollographql/apollo-ios/pull/3518)):** Xcode 16.3 changed the execution directory for plugins. This is fixed and will work for both < 16.3 and >= 16.3 Xcode versions. See PR [#623](https://github.com/apollographql/apollo-ios-dev/pull/623). _Thank you to [@robb](https://github.com/robb) for raising the issue._
+
+### Improvement
+- **More contextual multipart parsing errors ([#3536](https://github.com/apollographql/apollo-ios/issues/3536#issuecomment-2763230360)):** Apollo iOS will now throw narrower scoped errors when a multipart message cannot be parsed. This will help in determining which part of the response is causing the issue. See PR [#628](https://github.com/apollographql/apollo-ios-dev/pull/628). _Thank you to [@GRajin](https://github.com/GRajin) for raising the issue._
+
+## v1.19.0
+
+### New
+- **New function to mutate the properties of a local cache mutation fragment. ([#3433](https://github.com/apollographql/apollo-ios/issues/3443)):** Removal of the setter for type conditions made it difficult to work with the properties on those types. A new `mutateIfFulfilled` function was added to facilitate that workflow while still preventing a fragment from being added or removed from an existing model. See PR [#608](https://github.com/apollographql/apollo-ios-dev/pull/608).
+- **Configure `URLRequest` timeout interval ([#3522](https://github.com/apollographql/apollo-ios/issues/3522)):** Added a request context specialization protocol (`RequestContextTimeoutConfigurable`) that specifies options for configuring the timeout interval of a `URLRequest`. See PR [#618](https://github.com/apollographql/apollo-ios-dev/pull/618).
+
+## v1.18.0
+
+### New
+- **Reduce Generated Schema Types ([#3505](https://github.com/apollographql/apollo-ios/issues/3505)):** Adds a new codegen configuration option to reduce the number of `Object` types that are generated so that only types that are referenced in an operation document or have a `@typePolicy` will be generated. See PR [#601](https://github.com/apollographql/apollo-ios-dev/pull/601).
+
+### Improvement
+- **Identifiable conformance for named fragments ([#595](https://github.com/apollographql/apollo-ios-dev/pull/595)):** Identifiable conformance was previously implemented ([#584](https://github.com/apollographql/apollo-ios-dev/pull/584)) for selection sets and has now been extended to include named fragments. _Thank you to [@x-sheep](https://github.com/x-sheep) for the contribution._
+
+### Fixed
+- **Accessing an unset deprecated field in input causes a crash ([#3506](https://github.com/apollographql/apollo-ios/issues/3506)):** `InputObject` needed a `GraphQLNullable`-specific subscript to prevent nil value keys being forcefully unwrapped. See PR [#596](https://github.com/apollographql/apollo-ios-dev/pull/596). _Thank you to [@pixelmatrix](https://github.com/pixelmatrix) for raising the issue._
+- **Crash in `WebSocketTransport` due to data races ([#3512](https://github.com/apollographql/apollo-ios/issues/3512)):** This data race would occur if starting or stopping a subscription at the same time as a message received on the websocket. To prevent these data races the `subscribers` property is now an `@Atomic` property. See PR [#599](https://github.com/apollographql/apollo-ios-dev/pull/599). _Thank you to [@tahirmt](https://github.com/tahirmt) for the contribution._
+
+## v1.17.0
+
+### New
+- **Add suffix to schema type filenames ([#2598](https://github.com/apollographql/apollo-ios/issues/2598)):** When fragments were named the same as schema types code generation would produce two files with the same name, but at different paths, for each respective type. This would cause a build error in Xcode. There is a new codegen configuration option (`appendSchemaTypeFilenameSuffix`) to add a suffix to schema generated filenames and prevent the build error. See PR [#580](https://github.com/apollographql/apollo-ios-dev/pull/580).
+- **Specify caching fields with `typePolicy` directive ([#554](https://github.com/apollographql/apollo-ios-dev/pull/554)):** The `@typePolicy` directive lets you specify an object's cache ID using key fields of the response object. See the [documentation](https://www.apollographql.com/docs/ios/caching/cache-key-resolution#the-typepolicy-directive) for full details. _Thank you to [@x-sheep](https://github.com/x-sheep) for the contribution._
+- **Emit `Identifiable` conformance on `SelectionSet` ([#584](https://github.com/apollographql/apollo-ios-dev/pull/584)):** If the `@typePolicy` of a type uses a `keyField` of `id` the selection set will emit conformance to Swifts [`Identifiable` protocol](https://developer.apple.com/documentation/swift/identifiable). _Thank you to [@x-sheep](https://github.com/x-sheep) for the contribution._
+
+### Improvement
+- **Improved performance of code generation on operations with many nested fragments ([#3434](https://github.com/apollographql/apollo-ios/issues/3434)):** When fragment field merging is disabled the fragment selection trees are no longer merged into the `EntitySelectionSet` while building operations. See PR [#571](https://github.com/apollographql/apollo-ios-dev/pull/571).
+
+### Fixed
+- **Defer metadata extension ([#3505](https://github.com/apollographql/apollo-ios/issues/3503)):** Metadata extensions for deferred selection sets were incorrectly generated inside the namespace extension for `embeddedInTarget` and `other` module types. See PR [#581](https://github.com/apollographql/apollo-ios-dev/pull/581).
+- **`DataDict` initialization of `deferredFragments` for named fragments ([#587](https://github.com/apollographql/apollo-ios-dev/pull/587)):** When deferred fragments are named fragments the deferred type should be the fragment generated definition name.
+
+## v1.16.1
+
+### Fixed
+- **Web socket data race crash fixed ([#578](https://github.com/apollographql/apollo-ios-dev/pull/578)):** A data race in the web socket layer was causing crashes in some rare circumstances.
+
+- **Added support for GraphQL over HTTP media type([#558](https://github.com/apollographql/apollo-ios-dev/pull/558)):** Apollo iOS now supports the `content-type` header with a type of `application/graphql-response+json`.
+
+## v1.16.0
+
+### New
+- **Added codegen config support for spm module type versions ([#539](https://github.com/apollographql/apollo-ios-dev/pull/539)):** There is a [new codegen config option](https://www.apollographql.com/docs/ios/code-generation/codegen-configuration#swift-package) for supplying a version to the SPM module type to allow for pointing to specific branches or local versions of Apollo iOS.
+- **`@oneOf` input object support ([#537](https://github.com/apollographql/apollo-ios-dev/pull/537)):** Adding support for `@OneOf` Input Objects, more info can be found in the official [RFC](https://github.com/graphql/graphql-spec/pull/825).
+
+### Improvements
+- **`URLRequest` cache policy default changed ([#550](https://github.com/apollographql/apollo-ios-dev/pull/550)):** The updated default closer matches the original behaviour before the introduction of setting `URLRequest.CachePolicy`. _Thank you to [@marksvend](https://github.com/marksvend) for raising the issue._
+
+### Fixed
+- **`DataDict` initialization of `deferredFragments` property ([#557](https://github.com/apollographql/apollo-ios-dev/pull/557)):** Generated selection set initializers were not correctly setting deferred fragment identifiers. This only affected selection sets that were instantiated with the generated selection set initializers, response-based results are unaffected.
+- **Multipart chunk content type ([#572](https://github.com/apollographql/apollo-ios-dev/pull/572)):** Multipart response parsing would produce an error when the chunk content type contained more than one directive. _Thank you to [@brettephillips](https://github.com/brettephillips) for raising the issue._
+
+## v1.15.3
+
+### Improvements
+- **Stable sort schema types for SchemaMetadata ([#514](https://github.com/apollographql/apollo-ios-dev/pull/514)):** _Thank you to [@asmundg](https://github.com/asmundg) for the contribution._
+
+### Fixed
+- **Fix multipart delimter boundary parsing ([#502](https://github.com/apollographql/apollo-ios-dev/pull/502)):** The multipart message parsing code was not splitting message chunks at the correct boundary when the dash boundary was present in the message body.
+- **Fix Websocket error broadcast for unsubscribed ID ([#506](https://github.com/apollographql/apollo-ios-dev/pull/506))** Only broadcast an error to all subscribers if there was no id field in the message.
+- **Fix bug with `AnyHashable` coercion for non-iOS platforms ([#517](https://github.com/apollographql/apollo-ios-dev/pull/517)):** Extended the _AnyHashableCanBeCoerced check to include macOS, watchOS, and tvOS with their respective minimum versions. _Thank you to [@VMLe](https://github.com/VMLe) for the fix._
+- **Fix assigning websocket callback queue before connecting ([#529](https://github.com/apollographql/apollo-ios-dev/pull/529)):** Fixed a race condition with the callback queue assignment during an unstable connection.
+- **Fix `GraphQLOperation` hash uniqueness ([#530](https://github.com/apollographql/apollo-ios-dev/pull/530)):** Adding uniqueness to GraphQLOperation hashing.
+
+## v1.15.2
+
+### Improvements
+- **Set `URLRequest` cache policy on GET requests ([#476](https://github.com/apollographql/apollo-ios-dev/pull/476)):** Uses the Apollo cache policy to set a comparable cache policy on `URLRequest`. Previously there was no way to opt-out of default `URLRequest` caching behaviour.
+- **Batch writing records to the SQLite store ([#498](https://github.com/apollographql/apollo-ios-dev/pull/498)):** Uses the `insertMany` to batch write records for a given operation vs previously performing a write for each individual record.
+
+### Fixed
+- **Fix `ListData` type check ([#473](https://github.com/apollographql/apollo-ios-dev/pull/473)):** Fixed bool type check in `ListData`.
+- **Remove local cache mutation type condition setter ([#485](https://github.com/apollographql/apollo-ios-dev/pull/485)):** Removes the setter for mutable inline fragments. The correct way to initialize with a type condition is to use `asRootEntityType`.
+
+## v1.15.1
+
+### Fixed
+- **Fix decoding of deprecated `selectionSetInitializer` option `localCacheMutations` ([#467](https://github.com/apollographql/apollo-ios-dev/pull/467)):** This option was deprecated in `1.15.0`, and the removal of the code to parse the option resulted in a validation error when the deprecated option was present in the JSON code generation config file. This is now fixed so that the option is ignored but does not cause code generation to fail.  
+- **Disfavour deprecated watch function ([#469](https://github.com/apollographql/apollo-ios-dev/pull/469)):** A deprecated version of the `watch` function matched the overload of the current version if certain parameters were omitted. This caused an incorrect deprecation warning in this situation. We've fixed this by adding `@_disfavoredOverload` to the deprecated function signature.
+  
+## v1.15.0
+
+### New
+- **Add ability to disable fragment field merging ([#431](https://github.com/apollographql/apollo-ios-dev/pull/431)):** Added `ApolloCodegenConfiguration` option to allow for disabling fragment field merging on generated models. For more information on this feature see the notes [here](https://github.com/apollographql/apollo-ios/releases/tag/preview-field-merging.1).
+
+### Fixed
+- **Fix `legacyResponse` property not being set on `HTTPResponse` ([#456](https://github.com/apollographql/apollo-ios-dev/pull/456)):** When the `legacyResponse` property of `HTTPResponse` was deprecated setting the value was also removed; this was incorrect as it created a hidden breaking change for interceptors that might have been using the value.
+- **Fix `ObjectData` type check ([#459](https://github.com/apollographql/apollo-ios-dev/pull/459)):** Fixed bool type check in `ObjectData`.
+- **Fix `SelectionSetTemplate` scope comparison ([#460](https://github.com/apollographql/apollo-ios-dev/pull/460)):** Refactored the selection set template scope comparison to account for an edge case in merged sources.
+- **Fix memory leak in DataLoader closure ([#457](https://github.com/apollographql/apollo-ios-dev/pull/457)):** Fixed a memory leak in the DataLoader closure in `ApolloStore` caused by implicit use of `self`. _Thank you to [@prabhuamol](https://github.com/prabhuamol) for finding and fixing this._
+
+### Breaking
+- **Bug Fix: Generated Selections Sets in Inclusion Condition Scope:** This fixes a bug when using @include/@skip where generated models that should have been generated inside of a conditional inline fragment were generated outside of the conditional scope. This may cause breaking changes for a small number of users. Those breaking changes are considered a bug fix since accessing the conditional inline fragments outside of the conditional scope could cause runtime crashes (if the conditions for their inclusion were not met). More information [here](https://github.com/apollographql/apollo-ios/releases/tag/preview-field-merging.1)
+
+## v1.14.1
+
+### New
+- **Ability to set the journal mode on sqlite cache databases ([#3399](https://github.com/apollographql/apollo-ios/issues/3399)):** There is now a function to set the journal mode of the connected sqlite database and control how the journal file is stored and processed. See PR [#443](https://github.com/apollographql/apollo-ios-dev/pull/443). _Thanks to [@pixelmatrix](https://github.com/pixelmatrix) for the feature request._
+
+### Fixed
+- **Fix crash when `GraphQLError` is “too many validation errors”" ([#438](https://github.com/apollographql/apollo-ios-dev/pull/438)):** When a GraphQLError from the JS parsing step is a “Too many validation errors” error, there is no `source` in the error object. Codegen will now check for it to avoid this edge case crash.
+- **Cache write interceptor should gracefully handle missing cache records ([#439](https://github.com/apollographql/apollo-ios-dev/pull/439)):** The work to support the `@defer` directive introduced a bug where the cache write interceptor would throw if no cache records were returned during response parsing. This is incorrect as there are no cache records in the case of an `errors` only GraphQL response.
+- **Avoid using `fatalError` on `JSONEncodable` ([#128](https://github.com/apollographql/apollo-ios-dev/pull/128)):** The fatal error logic in `JSONEncodable` was replaced with a type constraint `where` clause. _Thank you to [@arnauddorgans](https://github.com/arnauddorgans) for the contribution._
+- **Introspection-based schema download creates duplicate `@defer` directive definition ([#3417](https://github.com/apollographql/apollo-ios/issues/3417)):** The codegen engine can now correctly detect pre-existing `@defer` directive definitions in introspection sources and prevent the duplicate definition. See PR [#440](https://github.com/apollographql/apollo-ios-dev/pull/440). _Thanks to [@loganblevins](https://github.com/loganblevins) for reporting the issue._
+
+## v1.14.0
+
+### New
+- **Experimental support for the `@defer` directive:** You can now use the `@defer` directive in your operations and code generation will generate models that support asynchronously receiving the deferred selection sets. There is a helpful property wrapper with a projected value to determine the state of the deferred selection set, and support for cache reads and writes. This feature is enabled by default but is considered [experimental](https://www.apollographql.com/docs/resources/product-launch-stages/#experimental-features). Please refer to the [documentation](https://www.apollographql.com/docs/ios/fetching/defer/) for further details.
+- **Add `debugDescription` to `SelectionSet` ([#3374](https://github.com/apollographql/apollo-ios/issues/3374)):** This adds the ability to easily print code generated models to the Xcode debugger console. See PR [#412](https://github.com/apollographql/apollo-ios-dev/pull/412). _Thanks to [@raymondk-nf](https://github.com/raymondk-nf) for raising the issue._
+- **Xcode 16 editor config files ([#3404](https://github.com/apollographql/apollo-ios/issues/3404)):** Xcode 16 introduced support for `.editorconfig` files that represent settings like spaces vs. tabs, how many spaces per tab, etc. We've added a `.editorconfig` file with the projects preferred settings, so that the editor will use them automatically. See PR [#419](https://github.com/apollographql/apollo-ios-dev/pull/419). _Thanks to [@TizianoCoroneo](https://github.com/TizianoCoroneo) for raising the issue._
+
+### Fixed
+- **Local cache mutation build error in Swift 6 ([#3398](https://github.com/apollographql/apollo-ios/issues/3398)):** Mutating a property of a fragment annotated with the `@apollo_client_ios_localCacheMutation` directive caused a compile time error in Xcode 16 with Swift 6. See PR [#417](https://github.com/apollographql/apollo-ios-dev/pull/417). _Thanks to [@martin-muller](https://github.com/martin-muller) for raising the issue._
+
+## v1.13.0
+
+### New
+- **Added `ExistentialAny` requirement ([#379](https://github.com/apollographql/apollo-ios-dev/pull/379)):** This adds the `-enable-upcoming-feature ExistentialAny` to all targets to ensure compatibility with the upcoming Swift feature.
+- **Schema type renaming ([#388](https://github.com/apollographql/apollo-ios-dev/pull/388)):** This adds the feature to allow customizing the names of schema types in Swift generated code.
+- **JSONConverter helper ([#380](https://github.com/apollographql/apollo-ios-dev/pull/380)):** This adds a new helper class for handling JSON conversion of data including the ability to convert `SelectionSet` instances to JSON.
+
+### Fixed
+- **ApolloSQLite build error with Xcode 16 ([#386](https://github.com/apollographql/apollo-ios-dev/pull/386)):** This fixes a naming conflict with Foundation in iOS 18 and the SQLite library. _Thanks to [@rastersize](https://github.com/rastersize) for the contributon._
+
+## v1.12.2
+
+### Fixed
+- **Rebuilt the CLI binary with the correct version number:** The CLI binary included in the `1.12.1` package was built with an incorrect version number causing a version mismatch when attempting to execute code generation.
+
+## v1.12.1
+
+### Fixed
+- **Rebuilt the CLI binary:** The CLI binary included in the `1.12.0` package was built with inconsistent SDK versions resulting in the linker signing not working correctly.
+
+## v1.12.0
+
+### New
+- **`ID` as a custom scalar ([#3379](https://github.com/apollographql/apollo-ios/issues/3379)):** This changes the generation of the built-in GraphQL `ID` scalar to be treated as a custom scalar that can be modified by the user. See PR [#363](https://github.com/apollographql/apollo-ios-dev/pull/363).
+
+### Fixed
+- **Adds visionOS deployment to ApolloTestSupport podspec ([#364](https://github.com/apollographql/apollo-ios-dev/pull/364)):** This adds the `visionOS` deployment target to the ApolloTestSupport podspec to match the other package managers.
+- **Add `@_spi(Execution)` to executor for import in test mocks ([#362](https://github.com/apollographql/apollo-ios-dev/pull/362)):** This replaces the use of `@testable` in ApolloTestSupport with specific `@_spi` scopes. This resolves a few issues that have been reported where the Apollo module could not be built for testing in non-debug configurations.
+
+## v1.11.0
+
+### New
+
+- **Added `refetchOnFailedUpdates` option to `GraphQLQueryWatcher` ([#347](https://github.com/apollographql/apollo-ios/pull/347)):** This allows you to configure the query watcher not to refetch it's query from the server when a cache read to update it's data fails.
+ 
+### Fixed
+
+- **Generated input objects have default `nil` value for parameters with a schema-defined default value ([#2997](https://github.com/apollographql/apollo-ios/issues/2997)):** When the schema defines a default value for an input parameter, you can now omit that parameter when initializing the input object and the default value will be used. This corrects feature parity with the Apollo Kotlin client. See PR [#358](https://github.com/apollographql/apollo-ios-dev/pull/358).
+
+- **Fix namespacing error in `InterfaceTemplate` ([#3375](https://github.com/apollographql/apollo-ios/issues/3375)):** This fixes an issue where having a schema type named `Interface` caused compilation errors in generated code. See PR [#359](https://github.com/apollographql/apollo-ios-dev/pull/359).
+
+## v1.10.0
+
+### New
+
+- **Added support for visionOS ([#3320](https://github.com/apollographql/apollo-ios/issues/3320)):** All the dependecies that Apollo iOS requires have been updated to add support for visionOS, so we can now add official support for visionOS too. See PR [#333](https://github.com/apollographql/apollo-ios-dev/pull/333).
+
+### Improvement
+
+- **Add Sendable conformance to some basic SchemaTypes:** This adds `Sendable` conformance to the some of the generated schema types. This does not mean that all of the generated code is safe to use yet with complete concurrency checking of Swift 5.10 but it gets us closer to that goal. See PR [#322](https://github.com/apollographql/apollo-ios-dev/pull/322). _Thanks to [@bdbergeron](https://github.com/bdbergeron) for the contributon._
+
+## v1.9.3
+
+### Fixed
+
+- **Fix injecting of context for UploadRequest:** Any request context passed into an upload request was not being added to the HTTP request and would not be available to the interceptor chain. See PR ([#302](https://github.com/apollographql/apollo-ios-dev/pull/302)). _Thanks to [@RobertDresler](https://github.com/RobertDresler) for the contribution._
+- **Added support for SPM Package.resolved format version 3 ([#3355](https://github.com/apollographql/apollo-ios/issues/3355)):** When using Xcode 15.3 the codegen CLI would fail the `generate` command with an error stating the Package.resolve file version is unsupported. Version 3 is now accepted as a valid file format for the codegen version checker. See PR ([#304](https://github.com/apollographql/apollo-ios-dev/pull/304)).
+- **PrivacyInfo.xcprivacy file is invalid for Apollo and ApolloApi ([#3359](https://github.com/apollographql/apollo-ios/issues/3359)):** We received reports that when submitting to the App Store the submission would fail with an error stating that the privacy manifests were invalid. We identified the error and updated the privacy files. See PR ([#309](https://github.com/apollographql/apollo-ios-dev/pull/309)). _Thanks to [@azilbershtein](https://github.com/azilbershtein) for raising the issue._
+
+### Improvement
+
+- **Provide a direct means to observe changes in ApolloStore:** `ApolloStore` now exposes it's subscriber mechanism publicly. This means you can now observe and receive notifications about changes to the store. See PR ([#300](https://github.com/apollographql/apollo-ios-dev/pull/300)). _Thanks to [@jamesonwilliams](https://github.com/jamesonwilliams) for the contribution._
+- **Remove redundant iteration in EntitySelectionTree merging algorithm:** The conditions for merging selections were revisited and we identified, and removed, a redundant iteration. This is a significant performance improvement as it removes an entire additional iteration through all the conditional scopes in the tree. See PR ([#308](https://github.com/apollographql/apollo-ios-dev/pull/308)).
+
+## v1.9.2
+
+### Fixed
+
+- **Backwards Compatibility issues in 1.9.1:** 1.9.1 introduced a minor breaking change for some users who were creating a custom implementaiton of `ApolloClientProtocol`. Sorry about that! This patch release fixed the compatiblity. See PR [#290](https://github.com/apollographql/apollo-ios-dev/pull/290). _Thanks to [@michaelloo](https://github.com/michaelloo) for raising the issue._
+
+### Improvement
+
+- **Session and task descriptions parameters added to `URLSessionClient` ([#286](https://github.com/apollographql/apollo-ios-dev/pull/286)):** The `URLSessionClient` now allows you to set a `sessionDescription` on the session and `taskDescription` on each task. These are helpful when debugging, especially when analyzing HTTP traffic with Instruments. _Thanks to [@hishma](https://github.com/hishma) for the contribution._
+
 ## v1.9.1
 
 ### Fixed

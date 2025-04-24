@@ -22,7 +22,7 @@ open class HTTPRequest<Operation: GraphQLOperation>: Hashable {
   public let contextIdentifier: UUID?
 
   /// [optional] A context that is being passed through the request chain.
-  public let context: RequestContext?
+  public let context: (any RequestContext)?
   
   /// Designated Initializer
   ///
@@ -44,7 +44,7 @@ open class HTTPRequest<Operation: GraphQLOperation>: Hashable {
               clientVersion: String,
               additionalHeaders: [String: String],
               cachePolicy: CachePolicy = .default,
-              context: RequestContext? = nil) {
+              context: (any RequestContext)? = nil) {
     self.graphQLEndpoint = graphQLEndpoint
     self.operation = operation
     self.contextIdentifier = contextIdentifier
@@ -85,8 +85,14 @@ open class HTTPRequest<Operation: GraphQLOperation>: Hashable {
   /// - Throws: Any error in creating the request
   /// - Returns: The URL request, ready to send to your server.
   open func toURLRequest() throws -> URLRequest {
-    var request = URLRequest(url: self.graphQLEndpoint)
-    
+    var request: URLRequest
+
+    if let configContext = context as? any RequestContextTimeoutConfigurable {
+      request = URLRequest(url: self.graphQLEndpoint, timeoutInterval: configContext.requestTimeout)
+    } else {
+      request = URLRequest(url: self.graphQLEndpoint)
+    }
+
     for (fieldName, value) in additionalHeaders {
       request.addValue(value, forHTTPHeaderField: fieldName)
     }
